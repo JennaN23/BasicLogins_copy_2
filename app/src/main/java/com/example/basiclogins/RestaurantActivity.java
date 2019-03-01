@@ -3,9 +3,14 @@ package com.example.basiclogins;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.ContextMenu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.RatingBar;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -13,6 +18,8 @@ import android.widget.Toast;
 import com.backendless.Backendless;
 import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
+
+import java.util.List;
 
 public class RestaurantActivity extends AppCompatActivity {
 
@@ -24,6 +31,8 @@ public class RestaurantActivity extends AppCompatActivity {
     private EditText editTextWebsite;
     private Spinner spinnerPrice;
     private Button save;
+    private RestaurantAdapter adapter;
+    private ListView restaurantList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +41,8 @@ public class RestaurantActivity extends AppCompatActivity {
 
         wireWidgets();
         prefillFields();
+        onContextItemSelected();
+        onCreateContextMenu();
 
 
 
@@ -39,11 +50,25 @@ public class RestaurantActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 saveToBackendless();
+                registerForContextMenu(restaurantList);
             }
+
+
         });
+
 
     }
 
+    private void onContextItemSelected(){
+            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+            int index = info.position;
+    }
+
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.restaurantactivitymenu, menu);
+    }
 
 
     private void wireWidgets() {
