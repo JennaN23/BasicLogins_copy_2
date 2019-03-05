@@ -1,12 +1,16 @@
 package com.example.basiclogins;
 
+import android.content.ClipData;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.ActionMode;
 import android.view.ContextMenu;
+import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnLongClickListener;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -20,6 +24,7 @@ import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
 
 import java.util.List;
+import java.util.Map;
 
 public class RestaurantActivity extends AppCompatActivity {
 
@@ -32,7 +37,7 @@ public class RestaurantActivity extends AppCompatActivity {
     private Spinner spinnerPrice;
     private Button save;
     private RestaurantAdapter adapter;
-    private ListView restaurantList;
+    private List<Restaurant> restaurantList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,27 +46,52 @@ public class RestaurantActivity extends AppCompatActivity {
 
         wireWidgets();
         prefillFields();
-        onContextItemSelected();
-        onCreateContextMenu();
-
 
 
         save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 saveToBackendless();
-                registerForContextMenu(restaurantList);
             }
-
-
         });
-
-
     }
 
-    private void onContextItemSelected(){
-            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+    public void deleteRestaurant()
+    {
+        Backendless.Persistence.save( restaurant, new AsyncCallback<Restaurant>()
+        {
+            public void handleResponse( Restaurant savedRestaurant )
+            {
+                Backendless.Persistence.of( Restaurant.class ).remove( savedRestaurant,
+                        new AsyncCallback<Long>()
+                        {
+                            public void handleResponse( Long response )
+                            {
+                                Toast.makeText(RestaurantActivity.this, restaurant.getName() + " deleted", Toast.LENGTH_SHORT).show();
+                                // Contact has been deleted. The response is the
+                                // time in milliseconds when the object was deleted
+                            }
+                            public void handleFault( BackendlessFault fault )
+                            {
+                                Toast.makeText(RestaurantActivity.this, fault.getMessage(), Toast.LENGTH_SHORT).show();
+                                // an error has occurred, the error code can be
+                                // retrieved with fault.getCode()
+                            }
+                        } );
+            }
+            @Override
+            public void handleFault( BackendlessFault fault )
+            {
+                Toast.makeText(RestaurantActivity.this, fault.getMessage(), Toast.LENGTH_SHORT).show();
+                // an error has occurred, the error code can be retrieved with fault.getCode()
+            }
+        });
+    }
+
+    private void onContextItemSelected(MenuItem delete){
+            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) delete.getMenuInfo();
             int index = info.position;
+            adapter.notifyDataSetChanged();
     }
 
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
@@ -99,14 +129,14 @@ public class RestaurantActivity extends AppCompatActivity {
             restaurant.setRating(rating);
         }
 
+
         Backendless.Persistence.save( restaurant, new AsyncCallback<Restaurant>() {
             public void handleResponse(Restaurant response) {
                 Toast.makeText(RestaurantActivity.this, response.getName() + " saved", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(RestaurantActivity.this, RestaurantListActivity.class);
                 startActivity(intent);
-                // new Contact instance has been saved
+                // new Contact instance has been save
             }
-
             public void handleFault(BackendlessFault fault) {
                 Toast.makeText(RestaurantActivity.this, fault.getMessage(), Toast.LENGTH_SHORT).show();
                 // an error has occurred, the error code can be retrieved with fault.getCode()
