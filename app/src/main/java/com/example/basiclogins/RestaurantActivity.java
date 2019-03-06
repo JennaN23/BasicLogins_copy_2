@@ -1,20 +1,15 @@
 package com.example.basiclogins;
 
-import android.content.ClipData;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.ActionMode;
 import android.view.ContextMenu;
-import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnLongClickListener;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.RatingBar;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -24,7 +19,6 @@ import com.backendless.async.callback.AsyncCallback;
 import com.backendless.exceptions.BackendlessFault;
 
 import java.util.List;
-import java.util.Map;
 
 public class RestaurantActivity extends AppCompatActivity {
 
@@ -38,6 +32,9 @@ public class RestaurantActivity extends AppCompatActivity {
     private Button save;
     private RestaurantAdapter adapter;
     private List<Restaurant> restaurantList;
+
+    public RestaurantActivity() {
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,49 +53,21 @@ public class RestaurantActivity extends AppCompatActivity {
         });
     }
 
-    public void deleteRestaurant()
-    {
-        Backendless.Persistence.save( restaurant, new AsyncCallback<Restaurant>()
-        {
-            public void handleResponse( Restaurant savedRestaurant )
-            {
-                Backendless.Persistence.of( Restaurant.class ).remove( savedRestaurant,
-                        new AsyncCallback<Long>()
-                        {
-                            public void handleResponse( Long response )
-                            {
-                                Toast.makeText(RestaurantActivity.this, restaurant.getName() + " deleted", Toast.LENGTH_SHORT).show();
-                                // Contact has been deleted. The response is the
-                                // time in milliseconds when the object was deleted
-                            }
-                            public void handleFault( BackendlessFault fault )
-                            {
-                                Toast.makeText(RestaurantActivity.this, fault.getMessage(), Toast.LENGTH_SHORT).show();
-                                // an error has occurred, the error code can be
-                                // retrieved with fault.getCode()
-                            }
-                        } );
-            }
-            @Override
-            public void handleFault( BackendlessFault fault )
-            {
-                Toast.makeText(RestaurantActivity.this, fault.getMessage(), Toast.LENGTH_SHORT).show();
-                // an error has occurred, the error code can be retrieved with fault.getCode()
-            }
-        });
-    }
 
-    private void onContextItemSelected(MenuItem delete){
+    public boolean onContextItemSelected(MenuItem delete){
             AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) delete.getMenuInfo();
             int index = info.position;
             adapter.notifyDataSetChanged();
+        return false;
     }
 
+    /* @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.restaurantactivitymenu, menu);
     }
+    */
 
 
     private void wireWidgets() {
@@ -113,7 +82,6 @@ public class RestaurantActivity extends AppCompatActivity {
     }
 
     private void saveToBackendless() {
-        restaurant = new Restaurant();
         String name = editTextName.getText().toString();
         String address = editTextAddress.getText().toString();
         String cuisine = editTextCuisine.getText().toString();
@@ -147,7 +115,7 @@ public class RestaurantActivity extends AppCompatActivity {
 
     private void prefillFields() {
         Intent restaurantIntent = getIntent();
-        Restaurant restaurant = restaurantIntent.getParcelableExtra(RestaurantListActivity.EXTRA_RESTAURANT);
+        restaurant = restaurantIntent.getParcelableExtra(RestaurantListActivity.EXTRA_RESTAURANT);
         if(restaurant != null) {
             editTextName.setText(restaurant.getName());
             editTextAddress.setText(restaurant.getAddress());

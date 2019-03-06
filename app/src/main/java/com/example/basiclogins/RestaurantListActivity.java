@@ -24,6 +24,7 @@ import java.util.List;
 
 public class RestaurantListActivity extends AppCompatActivity {
 
+    private static final int MENU_DELETE = 10;
     private ListView listViewRestaurant;
     private FloatingActionButton floatingActionButtonRestaurantList;
     public static final String EXTRA_RESTAURANT = "";
@@ -61,6 +62,7 @@ public class RestaurantListActivity extends AppCompatActivity {
                 RestaurantAdapter adapter = new RestaurantAdapter(
                         RestaurantListActivity.this, android.R.layout.simple_list_item_1, restaurantList
                 );
+
                 listViewRestaurant.setAdapter(adapter);
                 // all Restaurant instances have been found
 
@@ -83,9 +85,60 @@ public class RestaurantListActivity extends AppCompatActivity {
     }
 
 
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v,
+                                    ContextMenu.ContextMenuInfo menuInfo) {
+        menu.add(Menu.NONE, MENU_DELETE, Menu.NONE, "DELETE");
+    }
 
     private void wireWidgets() {
         listViewRestaurant = findViewById(R.id.listview_restaurantlist);
         floatingActionButtonRestaurantList = findViewById(R.id.floatingActionButton_restaurantList);
+        registerForContextMenu(listViewRestaurant);
     }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        switch (item.getItemId()) {
+            case MENU_DELETE:
+                //delete_item(info.id);
+                return true;
+            default:
+                return super.onContextItemSelected(item);
+        }
+    }
+
+    public void deleteRestaurant(Restaurant restaurant)
+    {
+        Backendless.Persistence.save( restaurant, new AsyncCallback<Restaurant>()
+        {
+            public void handleResponse( Restaurant savedRestaurant )
+            {
+                Backendless.Persistence.of( Restaurant.class ).remove( savedRestaurant,
+                        new AsyncCallback<Long>()
+                        {
+                            public void handleResponse( Long response )
+                            {
+                                Toast.makeText(RestaurantListActivity.this, " deleted", Toast.LENGTH_SHORT).show();
+                                // Contact has been deleted. The response is the
+                                // time in milliseconds when the object was deleted
+                            }
+                            public void handleFault( BackendlessFault fault )
+                            {
+                                Toast.makeText(RestaurantListActivity.this, fault.getMessage(), Toast.LENGTH_SHORT).show();
+                                // an error has occurred, the error code can be
+                                // retrieved with fault.getCode()
+                            }
+                        } );
+            }
+            @Override
+            public void handleFault( BackendlessFault fault )
+            {
+                Toast.makeText(RestaurantListActivity.this, fault.getMessage(), Toast.LENGTH_SHORT).show();
+                // an error has occurred, the error code can be retrieved with fault.getCode()
+            }
+        });
+    }
+
 }
