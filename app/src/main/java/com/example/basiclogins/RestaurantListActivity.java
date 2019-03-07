@@ -9,6 +9,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -21,13 +22,17 @@ import com.backendless.exceptions.BackendlessFault;
 import com.backendless.persistence.DataQueryBuilder;
 
 import java.util.List;
+import java.util.Map;
 
 public class RestaurantListActivity extends AppCompatActivity {
 
     private static final int MENU_DELETE = 10;
+    private RestaurantAdapter adapter;
     private ListView listViewRestaurant;
+    private List<Restaurant> restaurantList;
     private FloatingActionButton floatingActionButtonRestaurantList;
     public static final String EXTRA_RESTAURANT = "";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +47,8 @@ public class RestaurantListActivity extends AppCompatActivity {
                 Intent intent = new Intent(RestaurantListActivity.this, RestaurantActivity.class);
                 startActivity(intent);
             }
+
+
         });
 
     }
@@ -100,9 +107,12 @@ public class RestaurantListActivity extends AppCompatActivity {
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        int index = info.position;
         switch (item.getItemId()) {
             case MENU_DELETE:
                 //delete_item(info.id);
+                deleteRestaurant((Restaurant) item);
+                adapter.notifyDataSetChanged();
                 return true;
             default:
                 return super.onContextItemSelected(item);

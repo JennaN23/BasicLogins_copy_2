@@ -44,7 +44,7 @@ public class RestaurantAdapter extends ArrayAdapter<Restaurant> {
             }
             textViewPrice.setText(price);
 
-            ratingBar.setRating((float)currentRestaurant.getRating(ratingBar));
+            ratingBar.setRating((float)currentRestaurant.getRating());
 
             return convertView;
         }

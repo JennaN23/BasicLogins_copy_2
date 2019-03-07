@@ -2,9 +2,6 @@ package com.example.basiclogins;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.widget.EditText;
-import android.widget.RatingBar;
-import android.widget.Spinner;
 
 public class Restaurant implements Parcelable {
     private String name;
@@ -62,7 +59,7 @@ public class Restaurant implements Parcelable {
         this.cuisine = cuisine;
     }
 
-    public double getRating(RatingBar ratingBar) {
+    public double getRating() {
         return rating;
     }
 

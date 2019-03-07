@@ -30,8 +30,6 @@ public class RestaurantActivity extends AppCompatActivity {
     private EditText editTextWebsite;
     private Spinner spinnerPrice;
     private Button save;
-    private RestaurantAdapter adapter;
-    private List<Restaurant> restaurantList;
 
     public RestaurantActivity() {
     }
@@ -54,22 +52,6 @@ public class RestaurantActivity extends AppCompatActivity {
     }
 
 
-    public boolean onContextItemSelected(MenuItem delete){
-            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) delete.getMenuInfo();
-            int index = info.position;
-            adapter.notifyDataSetChanged();
-        return false;
-    }
-
-    /* @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.restaurantactivitymenu, menu);
-    }
-    */
-
-
     private void wireWidgets() {
         save = findViewById(R.id.button_restaurantactivity_save);
         editTextName = findViewById(R.id.editText_restaurantactivity_name);
@@ -88,23 +70,25 @@ public class RestaurantActivity extends AppCompatActivity {
         int price = spinnerPrice.getSelectedItem().toString().length();
         double rating = ratingBar.getRating();
         String website = editTextWebsite.getText().toString();
-        if(restaurant != null){
-            restaurant.setName(name);
-            restaurant.setAddress(address);
-            restaurant.setWebsiteLink(website);
-            restaurant.setCuisine(cuisine);
-            restaurant.setPrice(price);
-            restaurant.setRating(rating);
+        if (restaurant == null) {
+            restaurant = new Restaurant();
         }
+        restaurant.setName(name);
+        restaurant.setAddress(address);
+        restaurant.setWebsiteLink(website);
+        restaurant.setCuisine(cuisine);
+        restaurant.setPrice(price);
+        restaurant.setRating(rating);
 
 
-        Backendless.Persistence.save( restaurant, new AsyncCallback<Restaurant>() {
+        Backendless.Persistence.save(restaurant, new AsyncCallback<Restaurant>() {
             public void handleResponse(Restaurant response) {
                 Toast.makeText(RestaurantActivity.this, response.getName() + " saved", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(RestaurantActivity.this, RestaurantListActivity.class);
                 startActivity(intent);
                 // new Contact instance has been save
             }
+
             public void handleFault(BackendlessFault fault) {
                 Toast.makeText(RestaurantActivity.this, fault.getMessage(), Toast.LENGTH_SHORT).show();
                 // an error has occurred, the error code can be retrieved with fault.getCode()
@@ -116,12 +100,12 @@ public class RestaurantActivity extends AppCompatActivity {
     private void prefillFields() {
         Intent restaurantIntent = getIntent();
         restaurant = restaurantIntent.getParcelableExtra(RestaurantListActivity.EXTRA_RESTAURANT);
-        if(restaurant != null) {
+        if (restaurant != null) {
             editTextName.setText(restaurant.getName());
             editTextAddress.setText(restaurant.getAddress());
             editTextWebsite.setText(restaurant.getWebsiteLink());
             editTextCuisine.setText(restaurant.getCuisine());
-            ratingBar.setRating((float)restaurant.getRating(ratingBar));
+            ratingBar.setRating((float) restaurant.getRating());
             spinnerPrice.setSelection(restaurant.getPrice() - 1);
         }
     }
