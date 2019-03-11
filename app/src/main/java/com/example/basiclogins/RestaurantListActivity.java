@@ -29,6 +29,7 @@ public class RestaurantListActivity extends AppCompatActivity {
     private static final int MENU_DELETE = 10;
     private RestaurantAdapter adapter;
     private ListView listViewRestaurant;
+    private Restaurant restaurant;
     private List<Restaurant> restaurantList;
     private FloatingActionButton floatingActionButtonRestaurantList;
     public static final String EXTRA_RESTAURANT = "";
@@ -54,7 +55,6 @@ public class RestaurantListActivity extends AppCompatActivity {
     }
 
 
-
     private void populateListView() {
 
         String ownerId = Backendless.UserService.CurrentUser().getObjectId();
@@ -62,11 +62,10 @@ public class RestaurantListActivity extends AppCompatActivity {
         DataQueryBuilder queryBuilder = DataQueryBuilder.create();
         queryBuilder.setWhereClause(whereClause);
 
-        Backendless.Data.of(Restaurant.class).find(new AsyncCallback<List<Restaurant>>(){
+        Backendless.Data.of(Restaurant.class).find(new AsyncCallback<List<Restaurant>>() {
             @Override
-            public void handleResponse(final List<Restaurant> restaurantList )
-            {
-                RestaurantAdapter adapter = new RestaurantAdapter(
+            public void handleResponse(final List<Restaurant> restaurantList) {
+                adapter = new RestaurantAdapter(
                         RestaurantListActivity.this, android.R.layout.simple_list_item_1, restaurantList
                 );
 
@@ -82,9 +81,9 @@ public class RestaurantListActivity extends AppCompatActivity {
                     }
                 });
             }
+
             @Override
-            public void handleFault( BackendlessFault fault )
-            {
+            public void handleFault(BackendlessFault fault) {
                 // an error has occurred, the error code can be retrieved with fault.getCode()
                 Toast.makeText(RestaurantListActivity.this, fault.getMessage(), Toast.LENGTH_SHORT).show();
             }
@@ -111,44 +110,35 @@ public class RestaurantListActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case MENU_DELETE:
                 //delete_item(info.id);
-                deleteRestaurant((Restaurant) item);
-                adapter.notifyDataSetChanged();
+                restaurant = (Restaurant) listViewRestaurant.getItemAtPosition(index);
+                deleteRestaurant();
+
                 return true;
             default:
                 return super.onContextItemSelected(item);
         }
     }
 
-    public void deleteRestaurant(Restaurant restaurant)
-    {
-        Backendless.Persistence.save( restaurant, new AsyncCallback<Restaurant>()
-        {
-            public void handleResponse( Restaurant savedRestaurant )
-            {
-                Backendless.Persistence.of( Restaurant.class ).remove( savedRestaurant,
-                        new AsyncCallback<Long>()
-                        {
-                            public void handleResponse( Long response )
-                            {
-                                Toast.makeText(RestaurantListActivity.this, " deleted", Toast.LENGTH_SHORT).show();
-                                // Contact has been deleted. The response is the
-                                // time in milliseconds when the object was deleted
-                            }
-                            public void handleFault( BackendlessFault fault )
-                            {
-                                Toast.makeText(RestaurantListActivity.this, fault.getMessage(), Toast.LENGTH_SHORT).show();
-                                // an error has occurred, the error code can be
-                                // retrieved with fault.getCode()
-                            }
-                        } );
-            }
-            @Override
-            public void handleFault( BackendlessFault fault )
-            {
-                Toast.makeText(RestaurantListActivity.this, fault.getMessage(), Toast.LENGTH_SHORT).show();
-                // an error has occurred, the error code can be retrieved with fault.getCode()
-            }
-        });
+    public void deleteRestaurant() {
+
+
+        Backendless.Persistence.of(Restaurant.class).remove(restaurant,
+                new AsyncCallback<Long>() {
+                    public void handleResponse(Long response) {
+                        Toast.makeText(RestaurantListActivity.this, "Deleted", Toast.LENGTH_SHORT).show();
+                        populateListView();
+                        // Contact has been deleted. The response is the
+                        // time in milliseconds when the object was deleted
+                    }
+
+                    public void handleFault(BackendlessFault fault) {
+                        Toast.makeText(RestaurantListActivity.this, fault.getMessage(), Toast.LENGTH_SHORT).show();
+                        // an error has occurred, the error code can be
+                        // retrieved with fault.getCode()
+                    }
+                });
+
+
     }
 
 }
