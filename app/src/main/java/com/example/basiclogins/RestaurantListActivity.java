@@ -30,7 +30,6 @@ public class RestaurantListActivity extends AppCompatActivity {
     private RestaurantAdapter adapter;
     private ListView listViewRestaurant;
     private Restaurant restaurant;
-    private List<Restaurant> restaurantList;
     private FloatingActionButton floatingActionButtonRestaurantList;
     public static final String EXTRA_RESTAURANT = "";
 
